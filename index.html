@@ -1,157 +1,23 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
-
-  <title>문화제 답안 제출</title>
-
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>문화제 퀴즈</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
   <div class="container">
+    <h1>문화제 퀴즈</h1>
+    <h2>접속 화면을 선택하세요</h2>
 
-    <h1>문화제 답안 제출</h1>
+    <button onclick="location.href='player.html'">
+      참가자 화면
+    </button>
 
-
-    <!-- 입장 화면 -->
-    <div id="login-screen">
-
-      <h2>참가자 입장</h2>
-
-      <input
-        type="text"
-        id="name-input"
-        placeholder="닉네임을 입력하세요"
-      >
-
-      <input
-        type="text"
-        id="code-input"
-        placeholder="참가자 고유번호를 입력하세요"
-      >
-
-      <button id="login-button">
-        입장하기
-      </button>
-
-    </div>
-
-
-    <!-- 답안 제출 화면 -->
-    <div
-      id="answer-screen"
-      class="hidden"
-    >
-
-      <p id="player-name"></p>
-
-      <p id="player-code"></p>
-
-
-      <button id="edit-player-button">
-        참가자 정보 수정
-      </button>
-
-
-      <!-- 참가자 정보 수정 -->
-      <div
-        id="edit-screen"
-        class="hidden"
-      >
-
-        <h3>참가자 정보 수정</h3>
-
-        <input
-          type="text"
-          id="edit-name-input"
-          placeholder="닉네임"
-        >
-
-        <input
-          type="text"
-          id="edit-code-input"
-          placeholder="고유번호"
-        >
-
-        <button id="save-player-button">
-          수정 완료
-        </button>
-
-        <button id="cancel-edit-button">
-          취소
-        </button>
-
-      </div>
-
-
-      <hr>
-
-
-      <h2>
-        현재
-        <span id="question-number">1</span>번 문제
-      </h2>
-
-
-      <p>
-        배점:
-        <strong id="question-points">10</strong>점
-      </p>
-
-
-      <input
-        type="text"
-        id="answer-input"
-        placeholder="답변을 입력하세요"
-      >
-
-
-      <button id="submit-button">
-        제출
-      </button>
-
-
-      <p id="message"></p>
-
-    </div>
-
-
-    <!-- 종료 화면 -->
-    <div
-      id="end-screen"
-      class="hidden"
-    >
-
-      <h1>
-        레크레이션이 종료되었습니다!
-      </h1>
-
-      <h2>
-        수고하셨습니다!
-      </h2>
-
-    </div>
-
+    <button onclick="location.href='admin.html'">
+      진행자 화면
+    </button>
   </div>
-
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <script src="supabase.js"></script>
-
-  <script src="player.js"></script>
-
 </body>
-
 </html>
