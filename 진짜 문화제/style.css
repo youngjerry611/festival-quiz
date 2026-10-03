@@ -1,0 +1,98 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  min-height: 100vh;
+}
+
+.container {
+  width: 90%;
+  max-width: 500px;
+
+  background-color: white;
+  padding: 30px;
+
+  border-radius: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 30px;
+}
+
+input {
+  width: 90%;
+  padding: 14px;
+
+  margin: 10px 0;
+
+  font-size: 18px;
+
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+button {
+  width: 95%;
+  padding: 14px;
+
+  margin-top: 10px;
+
+  font-size: 18px;
+
+  border: none;
+  border-radius: 8px;
+
+  background-color: #222;
+  color: white;
+
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+.hidden {
+  display: none;
+}
+
+#player-name {
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+#message {
+  margin-top: 20px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.table-wrapper {
+  margin-top: 25px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+th {
+  background-color: #f0f0f0;
+}
