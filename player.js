@@ -849,16 +849,21 @@ submitButton.addEventListener(
     }
 
 
-    const userAnswer =
-      answer
+    const normalizeAnswer = (text) =>
+      text
         .trim()
-        .toLowerCase();
+        .toLowerCase()
+        .replace(/\s+/g, "");
+
+
+    const userAnswer =
+      normalizeAnswer(answer);
 
 
     const correctAnswer =
-      questionData.correct_answer
-        .trim()
-        .toLowerCase();
+      normalizeAnswer(
+        questionData.correct_answer
+      );
 
 
     const isCorrect =
