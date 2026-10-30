@@ -174,7 +174,7 @@ async function getGameData() {
 
     .from("답안")
 
-    .select('id, "참가자 id", 문제번호, 제출답안, 정답여부, 획득점수');
+    .select("*");
 
 
   if (answerError) {
