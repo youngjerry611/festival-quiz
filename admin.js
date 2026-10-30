@@ -29,6 +29,7 @@ const tableTitle =
 let currentQuestion = 1;
 
 let rankingMode = false;
+let adminRefreshing = false;
 
 
 // ==============================
@@ -800,19 +801,29 @@ startAdmin();
 setInterval(
   async () => {
 
-    await loadCurrentQuestion();
-
-
-    if (rankingMode) {
-
-      await loadRanking();
-
+    if (adminRefreshing) {
+      return;
     }
 
-    else {
+    adminRefreshing = true;
 
-      await loadStatus();
+    try {
+      await loadCurrentQuestion();
+
+      if (rankingMode) {
+
+        await loadRanking();
+
+      }
+
+      else {
+
+        await loadStatus();
+      }
+    }
+    finally {
+      adminRefreshing = false;
     }
   },
-  2000
+  4000
 );
