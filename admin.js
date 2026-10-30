@@ -29,6 +29,7 @@ const tableTitle =
 let currentQuestion = 1;
 
 let rankingMode = false;
+let adminRefreshing = false;
 
 
 // ==============================
@@ -153,7 +154,7 @@ async function getGameData() {
 
     .from("참가자")
 
-    .select("*");
+    .select("id, name, participant_code");
 
 
   if (playerError) {
@@ -173,7 +174,7 @@ async function getGameData() {
 
     .from("답안")
 
-    .select("*");
+    .select("id, 참가자 id, 문제번호, 제출답안, 정답여부, 획득점수");
 
 
   if (answerError) {
@@ -799,20 +800,25 @@ startAdmin();
 
 setInterval(
   async () => {
-
-    await loadCurrentQuestion();
-
-
-    if (rankingMode) {
-
-      await loadRanking();
-
+    if (adminRefreshing) {
+      return;
     }
 
-    else {
+    adminRefreshing = true;
 
-      await loadStatus();
+    try {
+      await loadCurrentQuestion();
+
+      if (rankingMode) {
+        await loadRanking();
+      }
+      else {
+        await loadStatus();
+      }
+    }
+    finally {
+      adminRefreshing = false;
     }
   },
-  2000
+  5000
 );
