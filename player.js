@@ -109,7 +109,7 @@ async function getCurrentQuestion() {
 
 async function loadQuestionPoints() {
 
-  if (currentQuestion > 10) {
+  if (currentQuestion > 18) {
     return;
   }
 
@@ -370,7 +370,7 @@ loginButton.addEventListener(
 
 
     // 이미 종료 상태
-    if (currentQuestion > 10) {
+    if (currentQuestion > 18) {
 
       showEndScreen();
 
@@ -1062,8 +1062,8 @@ async function checkCurrentQuestion() {
   }
 
 
-  // 11 = 종료 상태
-  if (serverQuestion > 10) {
+  // 19 = 종료 상태
+  if (serverQuestion > 18) {
 
     currentQuestion =
       serverQuestion;
@@ -1075,7 +1075,7 @@ async function checkCurrentQuestion() {
 
 
   // 종료 상태에서 이전 문제 복귀
-  if (currentQuestion > 10) {
+  if (currentQuestion > 18) {
 
     currentQuestion =
       serverQuestion;
@@ -1179,7 +1179,7 @@ async function restorePlayer() {
 
 
   if (
-    currentQuestion > 10
+    currentQuestion > 18
   ) {
 
     showEndScreen();
