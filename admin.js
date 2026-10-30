@@ -29,7 +29,6 @@ const tableTitle =
 let currentQuestion = 1;
 
 let rankingMode = false;
-let adminRefreshing = false;
 
 
 // ==============================
@@ -154,7 +153,7 @@ async function getGameData() {
 
     .from("참가자")
 
-    .select("id, name, participant_code");
+    .select("*");
 
 
   if (playerError) {
@@ -800,25 +799,20 @@ startAdmin();
 
 setInterval(
   async () => {
-    if (adminRefreshing) {
-      return;
+
+    await loadCurrentQuestion();
+
+
+    if (rankingMode) {
+
+      await loadRanking();
+
     }
 
-    adminRefreshing = true;
+    else {
 
-    try {
-      await loadCurrentQuestion();
-
-      if (rankingMode) {
-        await loadRanking();
-      }
-      else {
-        await loadStatus();
-      }
-    }
-    finally {
-      adminRefreshing = false;
+      await loadStatus();
     }
   },
-  5000
+  2000
 );
