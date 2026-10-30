@@ -65,6 +65,7 @@ let participantCode = "";
 let currentQuestion = 1;
 
 let submitted = false;
+let checkingCurrentQuestion = false;
 
 
 // ==============================
@@ -1048,64 +1049,68 @@ async function checkAlreadySubmitted() {
 
 async function checkCurrentQuestion() {
 
-  if (playerId === null) {
-    return;
-  }
-
-
-  const serverQuestion =
-    await getCurrentQuestion();
-
-
-  if (serverQuestion === null) {
-    return;
-  }
-
-
-  // 19 = 종료 상태
-  if (serverQuestion > 18) {
-
-    currentQuestion =
-      serverQuestion;
-
-    showEndScreen();
-
-    return;
-  }
-
-
-  // 종료 상태에서 이전 문제 복귀
-  if (currentQuestion > 18) {
-
-    currentQuestion =
-      serverQuestion;
-
-    showAnswerScreen();
-
-    await loadQuestionPoints();
-
-    await checkAlreadySubmitted();
-
-    return;
-  }
-
-
   if (
-    serverQuestion !==
-    currentQuestion
+    playerId === null ||
+    checkingCurrentQuestion
   ) {
+    return;
+  }
 
-    currentQuestion =
-      serverQuestion;
+  checkingCurrentQuestion = true;
 
+  try {
 
-    questionNumberText.textContent =
-      currentQuestion;
+    const serverQuestion =
+      await getCurrentQuestion();
 
+    if (serverQuestion === null) {
+      return;
+    }
 
-    await loadQuestionPoints();
+    // 19 = 종료 상태
+    if (serverQuestion > 18) {
 
-    await checkAlreadySubmitted();
+      currentQuestion =
+        serverQuestion;
+
+      showEndScreen();
+
+      return;
+    }
+
+    // 종료 상태에서 이전 문제 복귀
+    if (currentQuestion > 18) {
+
+      currentQuestion =
+        serverQuestion;
+
+      showAnswerScreen();
+
+      await loadQuestionPoints();
+
+      await checkAlreadySubmitted();
+
+      return;
+    }
+
+    if (
+      serverQuestion !==
+      currentQuestion
+    ) {
+
+      currentQuestion =
+        serverQuestion;
+
+      questionNumberText.textContent =
+        currentQuestion;
+
+      await loadQuestionPoints();
+
+      await checkAlreadySubmitted();
+    }
+  }
+  finally {
+    checkingCurrentQuestion = false;
   }
 }
 
@@ -1201,5 +1206,5 @@ restorePlayer();
 
 setInterval(
   checkCurrentQuestion,
-  1000
+  2500
 );
