@@ -902,75 +902,36 @@ async function checkAlreadySubmitted() {
     return;
   }
 
+  // 문제마다 제출 상태를 새로 시작
+  submitted = false;
+  answerInput.value = "";
+  answerInput.disabled = false;
+  submitButton.disabled = false;
+  submitButton.textContent = "제출";
+  message.textContent = "";
 
   const {
     data,
     error
   } = await supabaseClient
-
     .from("답안")
-
     .select("id")
-
-    .eq(
-      "참가자 id",
-      playerId
-    )
-
-    .eq(
-      "문제번호",
-      currentQuestion
-    )
-
+    .eq("참가자 id", playerId)
+    .eq("문제번호", currentQuestion)
     .maybeSingle();
 
-
   if (error) {
-
-    console.error(
-      error
-    );
-
+    console.error("제출 여부 확인 오류:", error);
+    message.textContent = "제출 여부 확인에 실패했습니다. 잠시 후 다시 시도해주세요.";
     return;
   }
 
-
   if (data) {
-
     submitted = true;
-
-    answerInput.disabled =
-      true;
-
-    submitButton.disabled =
-      true;
-
-    submitButton.textContent =
-      "제출 완료";
-
-    message.textContent =
-      "이미 답안을 제출했습니다.";
-
-  }
-
-  else {
-
-    submitted = false;
-
-    answerInput.value =
-      "";
-
-    answerInput.disabled =
-      false;
-
-    submitButton.disabled =
-      false;
-
-    submitButton.textContent =
-      "제출";
-
-    message.textContent =
-      "";
+    answerInput.disabled = true;
+    submitButton.disabled = true;
+    submitButton.textContent = "제출 완료";
+    message.textContent = "이미 답안을 제출했습니다.";
   }
 }
 
@@ -1035,6 +996,12 @@ async function checkCurrentQuestion() {
     currentQuestion =
       serverQuestion;
 
+    submitted = false;
+    answerInput.value = "";
+    answerInput.disabled = false;
+    submitButton.disabled = false;
+    submitButton.textContent = "제출";
+    message.textContent = "";
 
     questionNumberText.textContent =
       currentQuestion;
