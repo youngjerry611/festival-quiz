@@ -16,6 +16,9 @@ const previousButton =
 const rankingButton =
   document.getElementById("ranking-button");
 
+const resetScoreButton =
+  document.getElementById("reset-score-button");
+
 const currentQuestionText =
   document.getElementById("current-question");
 
@@ -80,7 +83,7 @@ async function loadCurrentQuestion() {
 function updateQuestionDisplay() {
 
   if (
-    currentQuestion > 10
+    currentQuestion > 18
   ) {
 
     currentQuestionText.textContent =
@@ -103,7 +106,7 @@ function updateQuestionDisplay() {
 function updateNextButton() {
 
   if (
-    currentQuestion < 10
+    currentQuestion < 18
   ) {
 
     nextButton.textContent =
@@ -115,7 +118,7 @@ function updateNextButton() {
   }
 
   else if (
-    currentQuestion === 10
+    currentQuestion === 18
   ) {
 
     nextButton.textContent =
@@ -607,9 +610,9 @@ nextButton.addEventListener(
   async () => {
 
 
-    // 1~9번
+    // 1~17번
     if (
-      currentQuestion < 10
+      currentQuestion < 18
     ) {
 
       await changeQuestion(
@@ -620,9 +623,9 @@ nextButton.addEventListener(
     }
 
 
-    // 10번
+    // 18번
     if (
-      currentQuestion === 10
+      currentQuestion === 18
     ) {
 
       const endConfirm =
@@ -636,8 +639,8 @@ nextButton.addEventListener(
       }
 
 
-      // 11 = 종료 상태
-      await changeQuestion(11);
+      // 19 = 종료 상태
+      await changeQuestion(19);
 
       return;
     }
@@ -653,12 +656,12 @@ previousButton.addEventListener(
   "click",
   async () => {
 
-    // 종료 상태 → 10번
+    // 종료 상태 → 18번
     if (
-      currentQuestion > 10
+      currentQuestion > 18
     ) {
 
-      await changeQuestion(10);
+      await changeQuestion(18);
 
       return;
     }
@@ -724,6 +727,51 @@ refreshButton.addEventListener(
 
     else {
 
+      await loadStatus();
+    }
+  }
+);
+
+
+// ==============================
+// 점수 초기화
+// ==============================
+
+resetScoreButton.addEventListener(
+  "click",
+  async () => {
+
+    const resetConfirm = confirm(
+      "모든 참가자의 점수를 0점으로 초기화하시겠습니까?"
+    );
+
+    if (!resetConfirm) {
+      return;
+    }
+
+    resetScoreButton.disabled = true;
+    resetScoreButton.textContent = "초기화 중...";
+
+    const { error } = await supabaseClient
+      .from("답안")
+      .update({ 획득점수: 0 })
+      .gte("id", 0);
+
+    resetScoreButton.disabled = false;
+    resetScoreButton.textContent = "점수 초기화";
+
+    if (error) {
+      console.error(error);
+      alert("점수 초기화에 실패했습니다. Supabase의 답안 테이블 UPDATE 권한을 확인해주세요.");
+      return;
+    }
+
+    alert("모든 참가자의 점수가 0점으로 초기화되었습니다.");
+
+    if (rankingMode) {
+      await loadRanking();
+    }
+    else {
       await loadStatus();
     }
   }
