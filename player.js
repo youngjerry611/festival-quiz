@@ -25,9 +25,6 @@ const playerCodeText =
 const questionNumberText =
   document.getElementById("question-number");
 
-const questionPointsText =
-  document.getElementById("question-points");
-
 const answerInput =
   document.getElementById("answer-input");
 
@@ -152,15 +149,7 @@ async function getCurrentQuestion() {
 // ==============================
 
 async function loadQuestionPoints() {
-  if (currentQuestion > 18) {
-    return;
-  }
-
-  const data = await getQuestionData(currentQuestion);
-
-  if (data) {
-    questionPointsText.textContent = data.points;
-  }
+  return;
 }
 
 
