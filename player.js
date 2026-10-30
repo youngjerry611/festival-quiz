@@ -25,9 +25,6 @@ const playerCodeText =
 const questionNumberText =
   document.getElementById("question-number");
 
-const questionPointsText =
-  document.getElementById("question-points");
-
 const answerInput =
   document.getElementById("answer-input");
 
@@ -109,39 +106,7 @@ async function getCurrentQuestion() {
 // ==============================
 
 async function loadQuestionPoints() {
-
-  if (currentQuestion > 18) {
-    return;
-  }
-
-
-  const { data, error } =
-    await supabaseClient
-      .from("questions")
-      .select("points")
-      .eq(
-        "question_number",
-        currentQuestion
-      )
-      .maybeSingle();
-
-
-  if (error) {
-
-    console.error(
-      "배점 조회 오류:",
-      error
-    );
-
-    return;
-  }
-
-
-  if (data) {
-
-    questionPointsText.textContent =
-      data.points;
-  }
+  return;
 }
 
 
