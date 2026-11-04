@@ -16,6 +16,9 @@ const answerScreen =
 const endScreen =
   document.getElementById("end-screen");
 
+const timeoutScreen =
+  document.getElementById("timeout-screen");
+
 const playerNameText =
   document.getElementById("player-name");
 
@@ -335,6 +338,15 @@ loginButton.addEventListener(
     }
 
 
+    // 시간 초과 상태
+    if (currentQuestion < 0) {
+
+      showTimeoutScreen();
+
+      return;
+    }
+
+
     // 이미 종료 상태
     if (currentQuestion > 18) {
 
@@ -386,6 +398,10 @@ function showAnswerScreen() {
     "hidden"
   );
 
+  timeoutScreen.classList.add(
+    "hidden"
+  );
+
 
   playerNameText.textContent =
     `${playerName}님`;
@@ -411,6 +427,30 @@ function showAnswerScreen() {
 
 
 // ==============================
+// 시간 초과 화면
+// ==============================
+
+function showTimeoutScreen() {
+
+  loginScreen.classList.add(
+    "hidden"
+  );
+
+  answerScreen.classList.add(
+    "hidden"
+  );
+
+  endScreen.classList.add(
+    "hidden"
+  );
+
+  timeoutScreen.classList.remove(
+    "hidden"
+  );
+}
+
+
+// ==============================
 // 종료 화면
 // ==============================
 
@@ -425,6 +465,9 @@ function showEndScreen() {
     "hidden"
   );
 
+  timeoutScreen.classList.add(
+    "hidden"
+  );
 
   endScreen.classList.remove(
     "hidden"
@@ -1032,47 +1075,33 @@ async function checkCurrentQuestion() {
       return;
     }
 
-    // 19 = 종료 상태
-    if (serverQuestion > 18) {
-
-      currentQuestion =
-        serverQuestion;
-
-      showEndScreen();
-
+    if (serverQuestion === currentQuestion) {
       return;
     }
 
-    // 종료 상태에서 이전 문제 복귀
+    currentQuestion =
+      serverQuestion;
+
+    // 시간 초과 상태
+    if (currentQuestion < 0) {
+
+      showTimeoutScreen();
+      return;
+    }
+
+    // 19 = 종료 상태
     if (currentQuestion > 18) {
 
-      currentQuestion =
-        serverQuestion;
-
-      showAnswerScreen();
-
-      await loadQuestionPoints();
-
-      await checkAlreadySubmitted();
-
+      showEndScreen();
       return;
     }
 
-    if (
-      serverQuestion !==
-      currentQuestion
-    ) {
+    // 정상 문제 화면
+    showAnswerScreen();
 
-      currentQuestion =
-        serverQuestion;
+    await loadQuestionPoints();
 
-      questionNumberText.textContent =
-        currentQuestion;
-
-      await loadQuestionPoints();
-
-      await checkAlreadySubmitted();
-    }
+    await checkAlreadySubmitted();
   }
   finally {
     checkingCurrentQuestion = false;
@@ -1145,6 +1174,16 @@ async function restorePlayer() {
 
     currentQuestion =
       serverQuestion;
+  }
+
+
+  if (
+    currentQuestion < 0
+  ) {
+
+    showTimeoutScreen();
+
+    return;
   }
 
 
