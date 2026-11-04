@@ -67,6 +67,16 @@ let currentQuestion = 1;
 let submitted = false;
 let checkingCurrentQuestion = false;
 
+function isTimeoutState(value) {
+  return value >= 101 && value <= 118;
+}
+
+function getRealQuestionNumber(value) {
+  return isTimeoutState(value)
+    ? value - 100
+    : value;
+}
+
 
 // ==============================
 // 현재 문제 번호 가져오기
@@ -339,7 +349,7 @@ loginButton.addEventListener(
 
 
     // 시간 초과 상태
-    if (currentQuestion < 0) {
+    if (isTimeoutState(currentQuestion)) {
 
       showTimeoutScreen();
 
@@ -412,7 +422,7 @@ function showAnswerScreen() {
 
 
   questionNumberText.textContent =
-    currentQuestion;
+    getRealQuestionNumber(currentQuestion);
 
 
   loginScreen.classList.add(
@@ -1083,7 +1093,7 @@ async function checkCurrentQuestion() {
       serverQuestion;
 
     // 시간 초과 상태
-    if (currentQuestion < 0) {
+    if (isTimeoutState(currentQuestion)) {
 
       showTimeoutScreen();
       return;
