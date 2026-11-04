@@ -13,6 +13,9 @@ const nextButton =
 const previousButton =
   document.getElementById("previous-button");
 
+const timeoutButton =
+  document.getElementById("timeout-button");
+
 const rankingButton =
   document.getElementById("ranking-button");
 
@@ -83,19 +86,32 @@ async function loadCurrentQuestion() {
 
 function updateQuestionDisplay() {
 
-  if (
-    currentQuestion > 18
-  ) {
+  if (currentQuestion > 18) {
 
     currentQuestionText.textContent =
       "레크레이션 종료";
 
   }
+  else if (currentQuestion < 0) {
 
+    currentQuestionText.textContent =
+      `${Math.abs(currentQuestion)}번 문제 - 시간 초과`;
+
+  }
   else {
 
     currentQuestionText.textContent =
       `${currentQuestion}번 문제`;
+  }
+
+  if (
+    currentQuestion < 0 ||
+    currentQuestion > 18
+  ) {
+    timeoutButton.disabled = true;
+  }
+  else {
+    timeoutButton.disabled = false;
   }
 }
 
@@ -106,9 +122,19 @@ function updateQuestionDisplay() {
 
 function updateNextButton() {
 
-  if (
-    currentQuestion < 18
-  ) {
+  const questionNumber =
+    Math.abs(currentQuestion);
+
+  if (currentQuestion > 18) {
+
+    nextButton.textContent =
+      "종료됨";
+
+    nextButton.disabled =
+      true;
+
+  }
+  else if (questionNumber < 18) {
 
     nextButton.textContent =
       "다음 문제";
@@ -117,26 +143,13 @@ function updateNextButton() {
       false;
 
   }
-
-  else if (
-    currentQuestion === 18
-  ) {
+  else {
 
     nextButton.textContent =
       "종료";
 
     nextButton.disabled =
       false;
-
-  }
-
-  else {
-
-    nextButton.textContent =
-      "종료됨";
-
-    nextButton.disabled =
-      true;
   }
 }
 
@@ -279,7 +292,7 @@ async function loadStatus() {
               )
               ===
               Number(
-                currentQuestion
+                Math.abs(currentQuestion)
               )
           );
 
@@ -610,39 +623,32 @@ nextButton.addEventListener(
   "click",
   async () => {
 
+    const questionNumber =
+      Math.abs(currentQuestion);
 
-    // 1~17번
-    if (
-      currentQuestion < 18
-    ) {
+    // 1~17번 → 다음 문제
+    if (questionNumber < 18) {
 
       await changeQuestion(
-        currentQuestion + 1
+        questionNumber + 1
       );
 
       return;
     }
 
-
-    // 18번
-    if (
-      currentQuestion === 18
-    ) {
+    // 18번 → 종료
+    if (questionNumber === 18) {
 
       const endConfirm =
         confirm(
           "레크레이션을 종료하시겠습니까?"
         );
 
-
       if (!endConfirm) {
         return;
       }
 
-
-      // 19 = 종료 상태
       await changeQuestion(19);
-
       return;
     }
   }
@@ -658,30 +664,51 @@ previousButton.addEventListener(
   async () => {
 
     // 종료 상태 → 18번
-    if (
-      currentQuestion > 18
-    ) {
+    if (currentQuestion > 18) {
 
       await changeQuestion(18);
-
       return;
     }
 
+    // 시간 초과 상태에서는 같은 문제를 다시 열기
+    if (currentQuestion < 0) {
 
-    if (
-      currentQuestion <= 1
-    ) {
-
-      alert(
-        "1번이 첫 문제입니다."
+      await changeQuestion(
+        Math.abs(currentQuestion)
       );
-
       return;
     }
 
+    if (currentQuestion <= 1) {
+
+      alert("1번이 첫 문제입니다.");
+      return;
+    }
 
     await changeQuestion(
       currentQuestion - 1
+    );
+  }
+);
+
+
+// ==============================
+// 시간 초과
+// ==============================
+
+timeoutButton.addEventListener(
+  "click",
+  async () => {
+
+    if (
+      currentQuestion < 1 ||
+      currentQuestion > 18
+    ) {
+      return;
+    }
+
+    await changeQuestion(
+      -currentQuestion
     );
   }
 );
