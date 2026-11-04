@@ -34,6 +34,16 @@ let currentQuestion = 1;
 let rankingMode = false;
 let adminRefreshing = false;
 
+function isTimeoutState(value) {
+  return value >= 101 && value <= 118;
+}
+
+function getRealQuestionNumber(value) {
+  return isTimeoutState(value)
+    ? value - 100
+    : value;
+}
+
 
 // ==============================
 // 현재 문제 불러오기
@@ -86,16 +96,16 @@ async function loadCurrentQuestion() {
 
 function updateQuestionDisplay() {
 
-  if (currentQuestion > 18) {
+  if (isTimeoutState(currentQuestion)) {
+
+    currentQuestionText.textContent =
+      `${getRealQuestionNumber(currentQuestion)}번 문제 - 시간 초과`;
+
+  }
+  else if (currentQuestion > 18) {
 
     currentQuestionText.textContent =
       "레크레이션 종료";
-
-  }
-  else if (currentQuestion < 0) {
-
-    currentQuestionText.textContent =
-      `${Math.abs(currentQuestion)}번 문제 - 시간 초과`;
 
   }
   else {
@@ -104,15 +114,9 @@ function updateQuestionDisplay() {
       `${currentQuestion}번 문제`;
   }
 
-  if (
-    currentQuestion < 0 ||
-    currentQuestion > 18
-  ) {
-    timeoutButton.disabled = true;
-  }
-  else {
-    timeoutButton.disabled = false;
-  }
+  timeoutButton.disabled =
+    isTimeoutState(currentQuestion) ||
+    currentQuestion > 18;
 }
 
 
@@ -123,9 +127,12 @@ function updateQuestionDisplay() {
 function updateNextButton() {
 
   const questionNumber =
-    Math.abs(currentQuestion);
+    getRealQuestionNumber(currentQuestion);
 
-  if (currentQuestion > 18) {
+  if (
+    currentQuestion > 18 &&
+    !isTimeoutState(currentQuestion)
+  ) {
 
     nextButton.textContent =
       "종료됨";
@@ -292,7 +299,7 @@ async function loadStatus() {
               )
               ===
               Number(
-                Math.abs(currentQuestion)
+                getRealQuestionNumber(currentQuestion)
               )
           );
 
@@ -624,7 +631,7 @@ nextButton.addEventListener(
   async () => {
 
     const questionNumber =
-      Math.abs(currentQuestion);
+      getRealQuestionNumber(currentQuestion);
 
     // 1~17번 → 다음 문제
     if (questionNumber < 18) {
@@ -674,7 +681,7 @@ previousButton.addEventListener(
     if (currentQuestion < 0) {
 
       await changeQuestion(
-        Math.abs(currentQuestion)
+        getRealQuestionNumber(currentQuestion)
       );
       return;
     }
@@ -708,7 +715,7 @@ timeoutButton.addEventListener(
     }
 
     await changeQuestion(
-      -currentQuestion
+      100 + currentQuestion
     );
   }
 );
