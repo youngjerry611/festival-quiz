@@ -751,6 +751,9 @@ submitButton.addEventListener(
     const answer =
       answerInput.value.trim();
 
+    const realQuestionNumber =
+      getRealQuestionNumber(currentQuestion);
+
 
     if (answer === "") {
 
@@ -791,7 +794,7 @@ submitButton.addEventListener(
 
       .eq(
         "문제번호",
-        currentQuestion
+        realQuestionNumber
       )
 
       .maybeSingle();
@@ -843,7 +846,7 @@ submitButton.addEventListener(
 
       .eq(
         "question_number",
-        currentQuestion
+        realQuestionNumber
       )
 
       .maybeSingle();
@@ -861,7 +864,7 @@ submitButton.addEventListener(
       unlockAnswer();
 
       alert(
-        `${currentQuestion}번 문제 정보가 없습니다.`
+        `${realQuestionNumber}번 문제 정보가 없습니다. Supabase questions 테이블의 해당 번호 행을 확인해주세요.`
       );
 
       return;
@@ -915,7 +918,7 @@ submitButton.addEventListener(
             playerName,
 
           문제번호:
-            currentQuestion,
+            realQuestionNumber,
 
           제출답안:
             answer,
