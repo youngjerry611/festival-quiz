@@ -66,62 +66,24 @@ let currentQuestion = 1;
 
 let submitted = false;
 let checkingCurrentQuestion = false;
-const questionCache = new Map();
-
-async function preloadQuestions() {
+async function getQuestionData(questionNumber) {
   const { data, error } = await supabaseClient
     .from("questions")
     .select("question_number, correct_answer, points")
-    .gte("question_number", 1)
-    .lte("question_number", 18);
+    .eq("question_number", questionNumber)
+    .maybeSingle();
 
   if (error) {
-    console.error("문제 전체 조회 오류:", error);
-    return;
-  }
-
-  questionCache.clear();
-
-  (data || []).forEach((q) => {
-    questionCache.set(Number(q.question_number), q);
-  });
-}
-
-async function getQuestionData(questionNumber) {
-  if (questionCache.has(questionNumber)) {
+    console.error("문제 조회 오류:", error);
     return {
-      data: questionCache.get(questionNumber),
-      error: null
+      data: null,
+      error: error
     };
   }
 
-  let lastError = null;
-
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const { data, error } = await supabaseClient
-      .from("questions")
-      .select("question_number, correct_answer, points")
-      .eq("question_number", questionNumber)
-      .maybeSingle();
-
-    if (!error && data) {
-      questionCache.set(questionNumber, data);
-      return { data, error: null };
-    }
-
-    if (error) {
-      lastError = error;
-      console.error("문제 조회 오류:", error);
-    }
-
-    if (attempt < 2) {
-      await new Promise(resolve => setTimeout(resolve, 400));
-    }
-  }
-
   return {
-    data: null,
-    error: lastError
+    data: data,
+    error: null
   };
 }
 
@@ -173,7 +135,7 @@ async function getCurrentQuestion() {
 
 
 // ==============================
-// 현재 문제 배점 표시
+// 배점은 참가자 화면에 표시하지 않음
 // ==============================
 
 async function loadQuestionPoints() {
@@ -1055,7 +1017,7 @@ async function checkAlreadySubmitted() {
 
     .eq(
       "문제번호",
-      currentQuestion
+      getRealQuestionNumber(currentQuestion)
     )
 
     .maybeSingle();
@@ -1238,7 +1200,7 @@ async function restorePlayer() {
 
 
   if (
-    currentQuestion < 0
+    isTimeoutState(currentQuestion)
   ) {
 
     showTimeoutScreen();
@@ -1265,7 +1227,6 @@ async function restorePlayer() {
 }
 
 
-preloadQuestions();
 restorePlayer();
 
 
