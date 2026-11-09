@@ -98,6 +98,32 @@ function getRealQuestionNumber(value) {
 }
 
 
+const QUESTION_NAMES = [
+  null,
+  "이모지 퀴즈 연습",
+  "이모지 퀴즈 1번",
+  "이모지 퀴즈 2번",
+  "이모지 퀴즈 3번",
+  "이모지 퀴즈 4번",
+  "사진 단서 1번",
+  "사진 단서 2번",
+  "사진 단서 3번",
+  "위기 탈출 연습",
+  "위기 탈출 1번",
+  "위기 탈출 2번",
+  "위기 탈출 3번",
+  "위기 탈출 4번",
+  "인물 퀴즈 연습",
+  "인물 퀴즈 1번",
+  "인물 퀴즈 2번",
+  "인물 퀴즈 3번",
+  "인물 퀴즈 4번"
+];
+
+function getQuestionName(questionNumber) {
+  return QUESTION_NAMES[questionNumber] || `${questionNumber}번 문제`;
+}
+
 // ==============================
 // 현재 문제 번호 가져오기
 // ==============================
@@ -442,7 +468,9 @@ function showAnswerScreen() {
 
 
   questionNumberText.textContent =
-    getRealQuestionNumber(currentQuestion);
+    getQuestionName(
+      getRealQuestionNumber(currentQuestion)
+    );
 
 
   loginScreen.classList.add(
