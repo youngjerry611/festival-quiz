@@ -45,6 +45,32 @@ function getRealQuestionNumber(value) {
 }
 
 
+const QUESTION_NAMES = [
+  null,
+  "이모지 퀴즈 연습",
+  "이모지 퀴즈 1번",
+  "이모지 퀴즈 2번",
+  "이모지 퀴즈 3번",
+  "이모지 퀴즈 4번",
+  "사진 단서 1번",
+  "사진 단서 2번",
+  "사진 단서 3번",
+  "위기 탈출 연습",
+  "위기 탈출 1번",
+  "위기 탈출 2번",
+  "위기 탈출 3번",
+  "위기 탈출 4번",
+  "인물 퀴즈 연습",
+  "인물 퀴즈 1번",
+  "인물 퀴즈 2번",
+  "인물 퀴즈 3번",
+  "인물 퀴즈 4번"
+];
+
+function getQuestionName(questionNumber) {
+  return QUESTION_NAMES[questionNumber] || `${questionNumber}번 문제`;
+}
+
 // ==============================
 // 현재 문제 불러오기
 // ==============================
@@ -98,8 +124,11 @@ function updateQuestionDisplay() {
 
   if (isTimeoutState(currentQuestion)) {
 
+    const realQuestion =
+      getRealQuestionNumber(currentQuestion);
+
     currentQuestionText.textContent =
-      `${getRealQuestionNumber(currentQuestion)}번 문제 - 시간 초과`;
+      `${getQuestionName(realQuestion)} - 시간 초과`;
 
   }
   else if (currentQuestion > 18) {
@@ -111,7 +140,7 @@ function updateQuestionDisplay() {
   else {
 
     currentQuestionText.textContent =
-      `${currentQuestion}번 문제`;
+      getQuestionName(currentQuestion);
   }
 
   timeoutButton.disabled =
