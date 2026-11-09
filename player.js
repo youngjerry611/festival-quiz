@@ -66,6 +66,49 @@ let currentQuestion = 1;
 
 let submitted = false;
 let checkingCurrentQuestion = false;
+const questionCache = new Map();
+
+async function preloadQuestions() {
+  const { data, error } = await supabaseClient
+    .from("questions")
+    .select("question_number, correct_answer, points")
+    .gte("question_number", 1)
+    .lte("question_number", 18);
+
+  if (error) {
+    console.error("문제 전체 조회 오류:", error);
+    return;
+  }
+
+  questionCache.clear();
+
+  (data || []).forEach((q) => {
+    questionCache.set(Number(q.question_number), q);
+  });
+}
+
+async function getQuestionData(questionNumber) {
+  if (questionCache.has(questionNumber)) {
+    return questionCache.get(questionNumber);
+  }
+
+  const { data, error } = await supabaseClient
+    .from("questions")
+    .select("question_number, correct_answer, points")
+    .eq("question_number", questionNumber)
+    .maybeSingle();
+
+  if (error) {
+    console.error("문제 조회 오류:", error);
+    return null;
+  }
+
+  if (data) {
+    questionCache.set(questionNumber, data);
+  }
+
+  return data;
+}
 
 function isTimeoutState(value) {
   return value >= 101 && value <= 118;
@@ -833,38 +876,17 @@ submitButton.addEventListener(
 
 
     // 문제 정보 가져오기
-    const {
-      data: questionData,
-      error: questionError
-    } = await supabaseClient
-
-      .from("questions")
-
-      .select(
-        "correct_answer, points"
-      )
-
-      .eq(
-        "question_number",
+    const questionData =
+      await getQuestionData(
         realQuestionNumber
-      )
-
-      .maybeSingle();
-
-
-    if (
-      questionError ||
-      !questionData
-    ) {
-
-      console.error(
-        questionError
       );
+
+    if (!questionData) {
 
       unlockAnswer();
 
       alert(
-        `${realQuestionNumber}번 문제 정보가 없습니다. Supabase questions 테이블의 해당 번호 행을 확인해주세요.`
+        `${realQuestionNumber}번 문제 정보가 없습니다. Supabase questions 테이블을 확인해주세요.`
       );
 
       return;
@@ -1218,6 +1240,7 @@ async function restorePlayer() {
 }
 
 
+preloadQuestions();
 restorePlayer();
 
 
