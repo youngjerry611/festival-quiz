@@ -13,7 +13,7 @@
 
   <link
     rel="stylesheet"
-    href="style.css"
+    href="style.css?v=timeout-1"
   >
 </head>
 
@@ -99,18 +99,9 @@
 
 
       <h2>
-        현재
-        <span id="question-number">1</span>번 문제
+        <span id="question-number">이모지 퀴즈 연습</span>
       </h2>
-
-
-      <p>
-        배점:
-        <strong id="question-points">10</strong>점
-      </p>
-
-
-      <input
+<input
         type="text"
         id="answer-input"
         placeholder="답변을 입력하세요"
@@ -123,6 +114,21 @@
 
 
       <p id="message"></p>
+
+    </div>
+
+
+    <!-- 시간 초과 화면 -->
+    <div
+      id="timeout-screen"
+      class="hidden"
+    >
+
+      <h1>시간 초과!</h1>
+
+      <h2>
+        다음 문제를 기다려주세요.
+      </h2>
 
     </div>
 
@@ -150,7 +156,7 @@
 
   <script src="supabase.js"></script>
 
-  <script src="player.js"></script>
+  <script src="player.js?v=question-names-final-2"></script>
 
 </body>
 
