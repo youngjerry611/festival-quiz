@@ -89,25 +89,40 @@ async function preloadQuestions() {
 
 async function getQuestionData(questionNumber) {
   if (questionCache.has(questionNumber)) {
-    return questionCache.get(questionNumber);
+    return {
+      data: questionCache.get(questionNumber),
+      error: null
+    };
   }
 
-  const { data, error } = await supabaseClient
-    .from("questions")
-    .select("question_number, correct_answer, points")
-    .eq("question_number", questionNumber)
-    .maybeSingle();
+  let lastError = null;
 
-  if (error) {
-    console.error("문제 조회 오류:", error);
-    return null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const { data, error } = await supabaseClient
+      .from("questions")
+      .select("question_number, correct_answer, points")
+      .eq("question_number", questionNumber)
+      .maybeSingle();
+
+    if (!error && data) {
+      questionCache.set(questionNumber, data);
+      return { data, error: null };
+    }
+
+    if (error) {
+      lastError = error;
+      console.error("문제 조회 오류:", error);
+    }
+
+    if (attempt < 2) {
+      await new Promise(resolve => setTimeout(resolve, 400));
+    }
   }
 
-  if (data) {
-    questionCache.set(questionNumber, data);
-  }
-
-  return data;
+  return {
+    data: null,
+    error: lastError
+  };
 }
 
 function isTimeoutState(value) {
@@ -876,18 +891,28 @@ submitButton.addEventListener(
 
 
     // 문제 정보 가져오기
-    const questionData =
+    const questionResult =
       await getQuestionData(
         realQuestionNumber
       );
+
+    const questionData =
+      questionResult.data;
 
     if (!questionData) {
 
       unlockAnswer();
 
-      alert(
-        `${realQuestionNumber}번 문제 정보가 없습니다. Supabase questions 테이블을 확인해주세요.`
-      );
+      if (questionResult.error) {
+        alert(
+          `${realQuestionNumber}번 문제 조회 오류: ${questionResult.error.message || questionResult.error.code || "알 수 없는 오류"}`
+        );
+      }
+      else {
+        alert(
+          `${realQuestionNumber}번 문제 행이 questions 테이블에 없습니다.`
+        );
+      }
 
       return;
     }
