@@ -16,6 +16,9 @@ const answerScreen =
 const endScreen =
   document.getElementById("end-screen");
 
+const timeoutScreen =
+  document.getElementById("timeout-screen");
+
 const playerNameText =
   document.getElementById("player-name");
 
@@ -24,9 +27,6 @@ const playerCodeText =
 
 const questionNumberText =
   document.getElementById("question-number");
-
-const questionPointsText =
-  document.getElementById("question-points");
 
 const answerInput =
   document.getElementById("answer-input");
@@ -65,7 +65,64 @@ let participantCode = "";
 let currentQuestion = 1;
 
 let submitted = false;
+let checkingCurrentQuestion = false;
+async function getQuestionData(questionNumber) {
+  const { data, error } = await supabaseClient
+    .from("questions")
+    .select("question_number, correct_answer, points")
+    .eq("question_number", questionNumber)
+    .maybeSingle();
 
+  if (error) {
+    console.error("문제 조회 오류:", error);
+    return {
+      data: null,
+      error: error
+    };
+  }
+
+  return {
+    data: data,
+    error: null
+  };
+}
+
+function isTimeoutState(value) {
+  return value >= 101 && value <= 118;
+}
+
+function getRealQuestionNumber(value) {
+  return isTimeoutState(value)
+    ? value - 100
+    : value;
+}
+
+
+const QUESTION_NAMES = [
+  null,
+  "이모지 퀴즈 연습",
+  "이모지 퀴즈 1번",
+  "이모지 퀴즈 2번",
+  "이모지 퀴즈 3번",
+  "이모지 퀴즈 4번",
+  "사진 단서 1번",
+  "사진 단서 2번",
+  "사진 단서 3번",
+  "위기 탈출 연습",
+  "위기 탈출 1번",
+  "위기 탈출 2번",
+  "위기 탈출 3번",
+  "위기 탈출 4번",
+  "인물 퀴즈 연습",
+  "인물 퀴즈 1번",
+  "인물 퀴즈 2번",
+  "인물 퀴즈 3번",
+  "인물 퀴즈 4번"
+];
+
+function getQuestionName(questionNumber) {
+  return QUESTION_NAMES[questionNumber] || `${questionNumber}번 문제`;
+}
 
 // ==============================
 // 현재 문제 번호 가져오기
@@ -104,43 +161,11 @@ async function getCurrentQuestion() {
 
 
 // ==============================
-// 현재 문제 배점 표시
+// 배점은 참가자 화면에 표시하지 않음
 // ==============================
 
 async function loadQuestionPoints() {
-
-  if (currentQuestion > 10) {
-    return;
-  }
-
-
-  const { data, error } =
-    await supabaseClient
-      .from("questions")
-      .select("points")
-      .eq(
-        "question_number",
-        currentQuestion
-      )
-      .maybeSingle();
-
-
-  if (error) {
-
-    console.error(
-      "배점 조회 오류:",
-      error
-    );
-
-    return;
-  }
-
-
-  if (data) {
-
-    questionPointsText.textContent =
-      data.points;
-  }
+  return;
 }
 
 
@@ -369,8 +394,17 @@ loginButton.addEventListener(
     }
 
 
+    // 시간 초과 상태
+    if (isTimeoutState(currentQuestion)) {
+
+      showTimeoutScreen();
+
+      return;
+    }
+
+
     // 이미 종료 상태
-    if (currentQuestion > 10) {
+    if (currentQuestion > 18) {
 
       showEndScreen();
 
@@ -420,6 +454,10 @@ function showAnswerScreen() {
     "hidden"
   );
 
+  timeoutScreen.classList.add(
+    "hidden"
+  );
+
 
   playerNameText.textContent =
     `${playerName}님`;
@@ -430,7 +468,9 @@ function showAnswerScreen() {
 
 
   questionNumberText.textContent =
-    currentQuestion;
+    getQuestionName(
+      getRealQuestionNumber(currentQuestion)
+    );
 
 
   loginScreen.classList.add(
@@ -439,6 +479,30 @@ function showAnswerScreen() {
 
 
   answerScreen.classList.remove(
+    "hidden"
+  );
+}
+
+
+// ==============================
+// 시간 초과 화면
+// ==============================
+
+function showTimeoutScreen() {
+
+  loginScreen.classList.add(
+    "hidden"
+  );
+
+  answerScreen.classList.add(
+    "hidden"
+  );
+
+  endScreen.classList.add(
+    "hidden"
+  );
+
+  timeoutScreen.classList.remove(
     "hidden"
   );
 }
@@ -459,6 +523,9 @@ function showEndScreen() {
     "hidden"
   );
 
+  timeoutScreen.classList.add(
+    "hidden"
+  );
 
   endScreen.classList.remove(
     "hidden"
@@ -732,6 +799,9 @@ submitButton.addEventListener(
     const answer =
       answerInput.value.trim();
 
+    const realQuestionNumber =
+      getRealQuestionNumber(currentQuestion);
+
 
     if (answer === "") {
 
@@ -772,7 +842,7 @@ submitButton.addEventListener(
 
       .eq(
         "문제번호",
-        currentQuestion
+        realQuestionNumber
       )
 
       .maybeSingle();
@@ -811,54 +881,48 @@ submitButton.addEventListener(
 
 
     // 문제 정보 가져오기
-    const {
-      data: questionData,
-      error: questionError
-    } = await supabaseClient
-
-      .from("questions")
-
-      .select(
-        "correct_answer, points"
-      )
-
-      .eq(
-        "question_number",
-        currentQuestion
-      )
-
-      .maybeSingle();
-
-
-    if (
-      questionError ||
-      !questionData
-    ) {
-
-      console.error(
-        questionError
+    const questionResult =
+      await getQuestionData(
+        realQuestionNumber
       );
+
+    const questionData =
+      questionResult.data;
+
+    if (!questionData) {
 
       unlockAnswer();
 
-      alert(
-        `${currentQuestion}번 문제 정보가 없습니다.`
-      );
+      if (questionResult.error) {
+        alert(
+          `${realQuestionNumber}번 문제 조회 오류: ${questionResult.error.message || questionResult.error.code || "알 수 없는 오류"}`
+        );
+      }
+      else {
+        alert(
+          `${realQuestionNumber}번 문제 행이 questions 테이블에 없습니다.`
+        );
+      }
 
       return;
     }
 
 
-    const userAnswer =
-      answer
+    const normalizeAnswer = (text) =>
+      text
         .trim()
-        .toLowerCase();
+        .toLowerCase()
+        .replace(/\s+/g, "");
+
+
+    const userAnswer =
+      normalizeAnswer(answer);
 
 
     const correctAnswer =
-      questionData.correct_answer
-        .trim()
-        .toLowerCase();
+      normalizeAnswer(
+        questionData.correct_answer
+      );
 
 
     const isCorrect =
@@ -891,7 +955,7 @@ submitButton.addEventListener(
             playerName,
 
           문제번호:
-            currentQuestion,
+            realQuestionNumber,
 
           제출답안:
             answer,
@@ -981,7 +1045,7 @@ async function checkAlreadySubmitted() {
 
     .eq(
       "문제번호",
-      currentQuestion
+      getRealQuestionNumber(currentQuestion)
     )
 
     .maybeSingle();
@@ -1043,64 +1107,54 @@ async function checkAlreadySubmitted() {
 
 async function checkCurrentQuestion() {
 
-  if (playerId === null) {
+  if (
+    playerId === null ||
+    checkingCurrentQuestion
+  ) {
     return;
   }
 
+  checkingCurrentQuestion = true;
 
-  const serverQuestion =
-    await getCurrentQuestion();
+  try {
 
+    const serverQuestion =
+      await getCurrentQuestion();
 
-  if (serverQuestion === null) {
-    return;
-  }
+    if (serverQuestion === null) {
+      return;
+    }
 
-
-  // 11 = 종료 상태
-  if (serverQuestion > 10) {
+    if (serverQuestion === currentQuestion) {
+      return;
+    }
 
     currentQuestion =
       serverQuestion;
 
-    showEndScreen();
+    // 시간 초과 상태
+    if (isTimeoutState(currentQuestion)) {
 
-    return;
-  }
+      showTimeoutScreen();
+      return;
+    }
 
+    // 19 = 종료 상태
+    if (currentQuestion > 18) {
 
-  // 종료 상태에서 이전 문제 복귀
-  if (currentQuestion > 10) {
+      showEndScreen();
+      return;
+    }
 
-    currentQuestion =
-      serverQuestion;
-
+    // 정상 문제 화면
     showAnswerScreen();
 
     await loadQuestionPoints();
 
     await checkAlreadySubmitted();
-
-    return;
   }
-
-
-  if (
-    serverQuestion !==
-    currentQuestion
-  ) {
-
-    currentQuestion =
-      serverQuestion;
-
-
-    questionNumberText.textContent =
-      currentQuestion;
-
-
-    await loadQuestionPoints();
-
-    await checkAlreadySubmitted();
+  finally {
+    checkingCurrentQuestion = false;
   }
 }
 
@@ -1174,7 +1228,17 @@ async function restorePlayer() {
 
 
   if (
-    currentQuestion > 10
+    isTimeoutState(currentQuestion)
+  ) {
+
+    showTimeoutScreen();
+
+    return;
+  }
+
+
+  if (
+    currentQuestion > 18
   ) {
 
     showEndScreen();
@@ -1196,5 +1260,5 @@ restorePlayer();
 
 setInterval(
   checkCurrentQuestion,
-  1000
+  2500
 );
